@@ -19,7 +19,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     msg = ''
     connections = []
-    notifiers = []
     usernames = []
     words = []
     nr = 0
