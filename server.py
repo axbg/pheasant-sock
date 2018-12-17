@@ -1,7 +1,7 @@
 import socket
 import sys
 
-HOST = 'localhost'                
+HOST = 'sys.ase.ro'                
 PORT = 6605
 
 if len(sys.argv) != 2:
@@ -10,25 +10,21 @@ if len(sys.argv) != 2:
 
 number_of_players = int(sys.argv[1])
 
+print('Fazan\nproiect realizat de Bișag Alexandru Ștefan în cadrul disciplinei Rețele de Calculatoare')
+
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((HOST, PORT))
     s.listen(10)
 
-    message = ''
+    msg = ''
     connections = []
     notifiers = []
     usernames = []
     words = []
     nr = 0
 
-    print('server started')
-    ##generate random first letter server-side
-    ##multiple servers for multiple games in the same time
-    ##user can create or join a game
-    ##if he creates, a token will be generated and others cand join using this token
-    ##use classes
-    #create functions
-    #extract constants
+    print('Serverul de joc a fost pornit!')
 
     while nr < number_of_players:
         conn, addr = s.accept()
@@ -43,21 +39,20 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             nr = len(connections)
 
             if nr == number_of_players:
-                msg = "Jocul a inceput!"
-            elif nr == number_of_players -1:
-                msg = "Jocul va incepe in curand. Mai este nevoie de un jucator."
+                msg = "Jocul a început!"
+            elif nr == number_of_players-1:
+                msg = "Jocul va începe în curând. Mai este nevoie de un jucător."
             else:
-                msg = "Jocul va incepe in curand. Mai este nevoie de " + str(number_of_players - nr) + " jucatori"
+                msg = "Jocul va începe în curând. Mai este nevoie de " + str(number_of_players - nr) + " jucători"
 
             conn.send(msg.encode())
-
             print(username + " s-a alaturat jocului.")
 
     while nr > 1:
         for i in range(0, nr):
             if words:
                 lastLetters = words[len(words)-1][-2::]
-                msg = 'Introdu un cuvant care sa inceapa cu literele: ' + lastLetters
+                msg = 'Introdu un cuvânt care să înceapă cu literele: ' + lastLetters
                 connections[i].send(msg.encode())
                 word = connections[i].recv(1024).decode('utf-8')
                 current_username = usernames[i]
@@ -70,15 +65,17 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                         connections[j].send(msg.encode())
                         connections[j].recv(1024)
                 else:
-
                     for j in range(0, nr):
                         msg = 'Jucatorul ' + current_username + ' a spus cuvantul ' + word + ' si a fost eliminat!'
                         connections[j].send(msg.encode())
                         connections[j].recv(1024)
 
                     connections[i].send('Ai fost eliminat!'.encode())
+                    print('Jucătorul ' + usernames[i] + ' a fost eliminat!')    
                     usernames.remove(usernames[i])
+                    connections[i].close()
                     connections.remove(connections[i])
+                    words = []
                     break
             else:
                 msg = 'Esti primul. Introdu un cuvant: '
@@ -95,5 +92,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     print('Castigatorul jocului este ' + usernames[0])
     connections[0].send('Felicitari! Ai castigat!'.encode())
-    
-s.close()
+    connections[0].close()
+
+    s.close()

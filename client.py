@@ -1,8 +1,7 @@
 import socket
 import sys
-import threading
 
-HOST = '127.0.0.1'
+HOST = 'sys.ase.ro'
 PORT = 6605   
 
 if len(sys.argv) != 2:
@@ -10,7 +9,6 @@ if len(sys.argv) != 2:
     exit(0)
 
 user = sys.argv[1]
-
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
